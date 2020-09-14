@@ -260,6 +260,12 @@ def test_get_time_function(get_product_flat):
 
 
 @pytest.mark.usefixtures("products")
+def test_get_time_bug(get_product_flat):
+    data = get_product_flat(1, "created_time__is_null,created_time__count", {})
+    assert data == [["NotNull", 1]]
+
+
+@pytest.mark.usefixtures("products")
 def test_get_is_null_function(get_product_flat):
     data = get_product_flat(1, "name+0,producer__address__city__is_null", {})
     assert data == [["a", "NotNull"], ["b", "NotNull"], ["c", "IsNull"]]
