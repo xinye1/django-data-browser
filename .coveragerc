@@ -12,3 +12,4 @@ exclude_lines =
 	pragma: not postgres
 	pragma: mysql
 	pragma: django < 3.1
+	pragma: django != 3.1.3
