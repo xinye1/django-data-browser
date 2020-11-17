@@ -67,6 +67,63 @@ def test_get_number_sub_field(get_results_flat):
     assert get_results_flat("json_field__position") == [{"json_field__position": 1}]
 
 
+def test_json_fuzz(db):
+    values = [
+        1,
+        1.1,
+        "bob",
+        True,
+        False,
+        None,
+        [],
+        {},
+        ["hello"],
+        {"hello": "world"},
+        [1],
+        {"hello": 1},
+    ]
+
+    works = True
+    obj = JsonModel.objects.create(json_field={"position": None})
+
+    print("XXX values")
+    for value in values:
+        obj.json_field["position"] = value
+        obj.save()
+        print("-------------", value)
+        try:
+            v = list(JsonModel.objects.values("json_field"))
+            assert v[0]["json_field"]["position"] == value
+        except Exception as e:
+            print(e)
+            works = False
+
+    print("XXX values subfield")
+    for value in values:
+        obj.json_field["position"] = value
+        obj.save()
+        print("-------------", value)
+        try:
+            v = list(JsonModel.objects.values("json_field__position"))
+            assert v[0]["json_field__position"] == value
+        except Exception as e:
+            print(e)
+            works = False
+
+    print("XXX values subfield")
+    for value in values:
+        obj.json_field["position"] = value
+        obj.save()
+        print("-------------", value)
+        try:
+            list(JsonModel.objects.filter(json_field__position=value))
+        except Exception as e:
+            print(e)
+            works = False
+
+    assert works
+
+
 def test_get_boolean_sub_field(get_results_flat):
     JsonModel.objects.create(json_field={"bool": True})
     assert get_results_flat("json_field__bool") == [{"json_field__bool": True}]
