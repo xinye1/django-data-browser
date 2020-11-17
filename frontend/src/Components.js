@@ -20,6 +20,7 @@ function FilterValue(props) {
       <select {...{ value }} onChange={onChangeEvent} className="FilterValue">
         <option value={"IsNull"}>IsNull</option>
         <option value={"NotNull"}>NotNull</option>
+        <option value={"MissingField"}>MissingField</option>
       </select>
     );
   else if (lookup.type.endsWith("choice"))

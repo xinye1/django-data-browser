@@ -19,7 +19,9 @@ else:  # pragma: no cover
 
 class JsonAdmin(AdminMixin, admin.ModelAdmin):
     fields = ["json_field"]
-    ddb_json_fields = {"json_field": {"hello": "string"}}
+    ddb_json_fields = {
+        "json_field": {"hello": "string", "position": "number", "bool": "boolean"}
+    }
 
 
 @pytest.fixture
@@ -55,9 +57,30 @@ def test_hello_world(get_results_flat):
     assert get_results_flat("json_field") == [{"json_field": '{"hello": "world"}'}]
 
 
-def test_get_sub_field(get_results_flat):
+def test_get_string_sub_field(get_results_flat):
     JsonModel.objects.create(json_field={"hello": "world"})
     assert get_results_flat("json_field__hello") == [{"json_field__hello": "world"}]
+
+
+def test_get_number_sub_field(get_results_flat):
+    JsonModel.objects.create(json_field={"position": 1})
+    assert get_results_flat("json_field__position") == [{"json_field__position": 1}]
+
+
+def test_get_boolean_sub_field(get_results_flat):
+    JsonModel.objects.create(json_field={"bool": True})
+    assert get_results_flat("json_field__bool") == [{"json_field__bool": True}]
+
+
+def test_sub_field_is_null(get_results_flat):
+    JsonModel.objects.create(json_field={"position": 1, "hello": "world"})
+    JsonModel.objects.create(json_field={"position": 2, "hello": None})
+    JsonModel.objects.create(json_field={"position": 3, "goodbye": "world"})
+    assert get_results_flat("json_field__hello__is_null,json_field__position+1") == [
+        {"json_field__hello__is_null": "NotNull", "json_field__position": 1},
+        {"json_field__hello__is_null": "IsNull", "json_field__position": 2},
+        {"json_field__hello__is_null": "MissingField", "json_field__position": 3},
+    ]
 
 
 def test_filter_sub_field(get_results_flat):
